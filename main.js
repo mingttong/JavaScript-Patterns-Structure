@@ -174,3 +174,56 @@ var Adapter = function () {
     //});
 
 }();
+
+console.log('###########################################');
+console.log('代理模式');
+
+var Proxy = function () {
+    console.log('代理模式没看懂');
+}();
+
+console.log('###########################################');
+console.log('装饰者模式');
+
+var DecoratorPattern = function () {
+
+    var decorator = function (input, type, fn) {
+        // 获取事件源
+        var input = document.getElementById(input);
+        // 若事件源已经绑定事件
+        if (input['on' + type] === 'function') {
+            // 缓存事件源原有回调函数
+            var oldEvent = input['on' + type];
+            // 为事件源定义新的事件
+            input['on' + type] = function () {
+                // 事件源原有回调函数
+                oldEvent();
+                // 执行事件源新增回调函数
+                fn();
+            }
+        } else {
+            // 事件源未绑定事件，直接为事件源添加新增回调函数
+            input['on' + type] = fn;
+        }
+        // 做其他事情
+    };
+
+    // 输入框的新需求
+    // 输入框元素
+    var telInput = document.getElementById('tel_input');
+    // 输入格式提示文案
+    var telWarnText = document.getElementById('tel_warn_text');
+    // 点击 输入框 提示 输入框输入格式 提示文案
+    telInput.onclick = function () {
+        telWarnText.style.display = 'inline-block';
+    };
+
+    // 电话输入框功能装饰
+    decorator('tel_input', 'click', function () {
+        document.getElementById('tel_demo_text').style.display = 'none';
+    });
+    decorator('tel_input', 'focus', function () {
+        console.log('event onfocus');
+    });
+
+}();
