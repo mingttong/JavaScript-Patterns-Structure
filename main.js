@@ -646,7 +646,7 @@ var Composite = function () {
     // ####LabelItem
     var LabelItem = function (classname, text) {
         Form.call(this);
-        this.classname = classname;
+        this.classname = classname || '';
         this.text = text;
         this.init();
     };
@@ -664,7 +664,7 @@ var Composite = function () {
     // ####InputItem
     var InputItem = function (classname) {
         Form.call(this);
-        this.classname = classname;
+        this.classname = classname || '';
         this.init();
     };
     inheritPrototype(InputItem, Form);
@@ -710,6 +710,20 @@ var Composite = function () {
                 new InputItem('user_password')
             ).add(
                 new SpanItem('6到12位数字或者字母')
+            )
+        )
+    ).add(
+        new FieldsetItem('message', '信息').add(
+            new Group().add(
+                new LabelItem('nick_name', '昵称：')
+            ).add(
+                new InputItem('nick_name')
+            )
+        ).add(
+            new Group().add(
+                new LabelItem('status', '状态：')
+            ).add(
+                new InputItem('status')
             )
         )
     ).show();
