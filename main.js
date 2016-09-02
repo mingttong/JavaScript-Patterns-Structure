@@ -550,4 +550,168 @@ var Composite = function () {
         )
     ).show();
 
+    console.log('####表单模块');
+
+    var Form = function () {
+        // 子组件容器
+        this.children = [];
+        // 当前组件元素
+        this.element = null;
+    };
+    Form.prototype = {
+        init : function () {
+            throw new Error('请重写你的方法');
+        },
+        getElement : function () {
+            throw new Error('请重写你的方法');
+        },
+        add : function () {
+            throw new Error('请重写你的方法');
+        }
+    };
+
+    // ####FormItem
+    var FormItem = function (id, parent) {
+        Form.call(this);
+        this.id = id;
+        this.parent = parent;
+        this.init();
+    };
+    inheritPrototype(FormItem, Form);
+    FormItem.prototype.init = function () {
+        this.element = document.createElement('form');
+        this.element.id = this.id;
+        this.element.className = 'new-FormItem';
+    };
+    FormItem.prototype.getElement = function () {
+        return this.element;
+    };
+    FormItem.prototype.add = function (child) {
+        this.children.push(child);
+        this.element.appendChild(child.getElement());
+
+        return this;
+    };
+    FormItem.prototype.show = function () {
+        this.parent.appendChild(this.element);
+    };
+
+    // ####FielsetItem
+    var FieldsetItem = function (classname, text) {
+        Form.call(this);
+        this.classname = classname || '';
+        this.text = text || '';
+        this.legend = null;
+        this.init();
+    };
+    inheritPrototype(FieldsetItem, Form);
+    FieldsetItem.prototype.init = function () {
+        this.element = document.createElement('fieldset');
+        this.element.className = this.classname;
+        this.legend = document.createElement('legend');
+        this.legend.appendChild(document.createTextNode(this.text));
+        this.element.appendChild(this.legend);
+    };
+    FieldsetItem.prototype.getElement = function () {
+        return this.element;
+    };
+    FieldsetItem.prototype.add = function (child) {
+        this.children.push(child);
+        this.element.appendChild(child.getElement());
+
+        return this;
+    };
+
+    // ####Group
+    var Group = function (classname) {
+        Form.call(this);
+        this.classname = classname || '';
+        this.init();
+    };
+    inheritPrototype(Group, Form);
+    Group.prototype.init = function () {
+        this.element = document.createElement('div');
+        this.element.className = this.classname;
+    };
+    Group.prototype.getElement = function () {
+        return this.element;
+    };
+    Group.prototype.add = function (child) {
+        this.children.push(child);
+        this.element.appendChild(child.getElement());
+
+        return this;
+    };
+
+    // ####LabelItem
+    var LabelItem = function (classname, text) {
+        Form.call(this);
+        this.classname = classname;
+        this.text = text;
+        this.init();
+    };
+    inheritPrototype(LabelItem, Form);
+    LabelItem.prototype.init = function () {
+        this.element = document.createElement('label');
+        this.element.className = this.classname;
+        this.element.appendChild(document.createTextNode(this.text));
+    };
+    LabelItem.prototype.getElement = function () {
+        return this.element;
+    };
+    LabelItem.prototype.add = function () {};
+
+    // ####InputItem
+    var InputItem = function (classname) {
+        Form.call(this);
+        this.classname = classname;
+        this.init();
+    };
+    inheritPrototype(InputItem, Form);
+    InputItem.prototype.init = function () {
+        this.element = document.createElement('input');
+        this.element.className = this.classname;
+    };
+    InputItem.prototype.getElement = function () {
+        return this.element;
+    };
+    InputItem.prototype.add = function () {};
+
+    // ####SpanItem
+    var SpanItem = function (text) {
+        Form.call(this);
+        this.text = text;
+        this.init();
+    };
+    inheritPrototype(SpanItem, Form);
+    SpanItem.prototype.init = function () {
+        this.element = document.createElement('span');
+        this.element.className = this.classname;
+    };
+    SpanItem.prototype.getElement = function () {
+        return this.element;
+    };
+    SpanItem.prototype.add = function () {};
+
+    var form = new FormItem('FormItem', document.body);
+    form.add(
+        new FieldsetItem('account', '账号').add(
+            new Group().add(
+                new LabelItem('user_name', '用户名：')
+            ).add(
+                new InputItem('username')
+            ).add(
+                new SpanItem('4到6位数字或字母')
+            )
+        ).add(
+            new Group().add(
+                new LabelItem('user_password', '密码：')
+            ).add(
+                new InputItem('user_password')
+            ).add(
+                new SpanItem('6到12位数字或者字母')
+            )
+        )
+    ).show();
+
 }();
