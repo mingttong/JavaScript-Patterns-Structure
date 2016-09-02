@@ -2,6 +2,22 @@
  * Created by lenovo on 2016/8/29.
  */
 
+
+console.log('通用方法：');
+
+function inheritPrototype (subClass, superClass) {
+    var p = inheritObject(superClass.prototype);
+    p.constructor = subClass;
+    subClass.prototype = p;
+}
+
+function inheritObject (o) {
+    function F () {}
+    F.prototype = o;
+    return new F();
+}
+
+console.log('###########################################');
 console.log('外观模式');
 
 var Facade = function () {
@@ -225,5 +241,313 @@ var DecoratorPattern = function () {
     decorator('tel_input', 'focus', function () {
         console.log('event onfocus');
     });
+
+}();
+
+console.log('###########################################');
+console.log('桥接模式');
+
+var Bridge = function () {
+
+    console.log('####原先冗余的代码');
+
+    var spans = document.getElementsByTagName('span');
+    // 为用户名绑定特效
+    spans[0].onmouseover = function () {
+        this.style.color = 'red';
+        this.style.background = '#ddd';
+    };
+    spans[0].onmouseout = function () {
+        this.style.color = '#333';
+        this.style.background = '#f5f5f5';
+    };
+    // 为等级绑定特效
+    spans[1].onmouseover = function () {
+        this.getElementsByTagName('strong')[0].style.color = 'red';
+        this.getElementsByTagName('strong')[0].style.background = '#ddd';
+    };
+    spans[1].onmouseout = function () {
+        this.getElementsByTagName('strong')[0].style.color = '#333';
+        this.getElementsByTagName('strong')[0].style.background = '#f5f5f5';
+    };
+
+    console.log('####事件与业务逻辑之间的桥梁');
+
+    // 提取共同点
+    // 抽象
+    function changeColor (dom, color, bg) {
+        // 设置元素的字体颜色
+        dom.style.color = color;
+        // 设置元素的背景颜色
+        dom.style.background = bg;
+    }
+
+    var spans = document.getElementsByTagName('span');
+    spans[0].onmouseover = function () {
+        changeColor(this, 'red', '#ddd');
+    };
+    spans[0].onmouseout = function () {
+        changeColor(this, '#333', '#f5f5f5');
+    };
+    spans[1].onmouseover = function () {
+        changeColor(this.getElementsByTagName('strong')[0], 'red', '#ddd');
+    };
+    spans[1].onmouseout = function () {
+        changeColor(this.getElementsByTagName('strong')[0], '#333', '#f5f5f5');
+    };
+
+    console.log('####多元化对象');
+
+    // 多维变量类
+    // 运动单元
+    function Speed (x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    Speed.prototype.run = function () {
+        console.log('运动起来');
+    };
+    //说话单元
+    function Speek (wd) {
+        this.word = wd;
+    }
+    Speek.prototype.say = function () {
+        console.log('书写字体');
+    };
+
+    function People (x, y, wd) {
+        this.speed = new Speed(x, y);
+        this.speek = new Speek(wd);
+    }
+    People.prototype.init = function () {
+        this.speed.run();
+        this.speek.say();
+    };
+
+    var p = new People(10, 12, 16);
+    p.init();
+
+}();
+
+console.log('###########################################');
+console.log('组合模式');
+
+var Composite = function () {
+
+    var News = function () {
+        // 子组件容器
+        this.children = [];
+        // 当前组件元素
+        this.element = null;
+    };
+    News.prototype = {
+        init : function () {
+            throw new Error("请重写你的方法");
+        },
+        add : function () {
+            throw new Error("请重写你的方法");
+        },
+        getElement : function () {
+            throw new Error("请重写你的方法");
+        }
+    };
+
+    console.log('####创建容器类');
+
+// ####容器类构造函数
+    var Container = function (id, parent) {
+        // 构造函数继承父类
+        News.call(this);
+        // 模块id
+        this.id = id;
+        // 模块父容器
+        this.parent = parent;
+        // 构建方法
+        this.init();
+    };
+// 寄生式继承父类原型方法
+    inheritPrototype(Container, News);
+// 构建方法
+    Container.prototype.init = function () {
+        this.element = document.createElement('ul');
+        this.element.id = this.id;
+        this.element.className = 'new-container';
+    };
+// 获取当前元素
+    Container.prototype.getElement = function () {
+        return this.element;
+    };
+// 添加子元素方法
+    Container.prototype.add = function (child) {
+        // 在子元素容器中插入子元素
+        this.children.push(child);
+        // 插入当前组件元素树中
+        this.element.appendChild(child.getElement());
+
+        return this;
+    };
+// 显示方法
+    Container.prototype.show = function () {
+        this.parent.appendChild(this.element);
+    };
+
+// ####行成员集合类
+    var Item = function (classname) {
+        News.call(this);
+        this.classname = classname || '';
+        this.init();
+    };
+    inheritPrototype(Item, News);
+    Item.prototype.init = function () {
+        this.element = document.createElement('li');
+        this.element.className = this.classname;
+    };
+    Item.prototype.add = function (child) {
+        // 在父元素容器中插入子元素
+        this.children.push(child);
+        // 插入当前组件元素中
+        this.element.appendChild(child.getElement());
+
+        return this;
+    };
+    Item.prototype.getElement = function () {
+        return this.element;
+    };
+
+// ####新闻组合体类
+    var NewsGroup = function (classname) {
+        News.call(this);
+        this.classname = classname || '';
+        this.init();
+    };
+    inheritPrototype(NewsGroup, News);
+    NewsGroup.prototype.init = function () {
+        this.element = document.createElement('div');
+        this.element.className = this.className;
+    };
+    NewsGroup.prototype.add = function (child) {
+        this.children.push(child);
+        this.element.appendChild(child.getElement());
+
+        return this;
+    };
+    NewsGroup.prototype.getElement = function () {
+        return this.element;
+    };
+
+    console.log('####创建新闻类');
+
+// 图片新闻类
+    var ImageNews = function (url, href, classname) {
+        News.call(this);
+        this.url = url || '';
+        this.href = href || '#';
+        this.classname = classname || 'normal';
+        this.init();
+    };
+    inheritPrototype(ImageNews, News);
+    ImageNews.prototype.init = function () {
+        this.element = document.createElement('a');
+        var img = new Image();
+        img.src = this.url;
+        this.element.appendChild(img);
+        this.element.className = 'image-news' + this.classname;
+        this.element.href = this.href;
+    };
+    ImageNews.prototype.add = function () {};
+    ImageNews.prototype.getElement = function () {
+        return this.element;
+    };
+
+    var IconNews = function (text, href, type) {
+        News.call(this);
+        this.text = text || '';
+        this.href = href || '#';
+        this.type = type || 'vedio';
+        this.init();
+    };
+    inheritPrototype(IconNews, News);
+    IconNews.prototype.init = function () {
+        this.element = document.createElement('a');
+        this.element.innerHTML = this.text;
+        this.element.href = this.href;
+        this.element.className = 'icon' + this.type;
+    };
+    IconNews.prototype.add = function () {};
+    IconNews.prototype.getElement = function () {
+        return this.element;
+    };
+
+    var EasyNews = function (text, href) {
+        News.call(this);
+        this.text = text || '';
+        this.href = href || '#';
+        this.init();
+    };
+    inheritPrototype(EasyNews, News);
+    EasyNews.prototype.init = function () {
+        this.element = document.createElement('a');
+        this.element.innerHTML = this.text;
+        this.element.href = this.href;
+        this.element.className = 'text';
+    };
+    EasyNews.prototype.add = function () {};
+    EasyNews.prototype.getElement = function () {
+        return this.element;
+    };
+
+    var TypeNews = function (text, href, type, pos) {
+        News.call(this);
+        this.text = text || '';
+        this.href = href || '#';
+        this.type = type || '';
+        this.pos = pos || 'left';
+        this.init();
+    };
+    inheritPrototype(TypeNews, News);
+    TypeNews.prototype.init = function () {
+        this.element = document.createElement('a');
+        if (this.pos === 'left') {
+            this.element.innerHTML = '[' + this.type + ']' + this.text;
+        } else {
+            this.element.innerHTML = this.text + '[' + this.type + ']';
+        }
+        this.element.href = this.href;
+        this.element.className = 'text';
+    };
+    TypeNews.prototype.add = function () {};
+    TypeNews.prototype.getElement = function () {
+        return this.element;
+    };
+
+    console.log('####创建新闻类');
+    var news1 = new Container('news', document.body);
+    news1.add(
+        new Item('normal').add(
+            new IconNews('梅西不拿金球也伟大', '#', 'video')
+        )
+    ).add(
+        new Item('normal').add(
+            new IconNews('保护强国强队用意明显', '#', 'live')
+        )
+    ).add(
+        new Item('normal').add(
+            new NewsGroup('has-img').add(
+                new ImageNews('img/1.jpg', '#', 'small')
+            ).add(
+                new EasyNews('从240斤胖子成功变型男', '#')
+            ).add(
+                new EasyNews('五大雷人跑步机', '#')
+            )
+        )
+    ).add(
+        new Item('normal').add(
+            new TypeNews('AK47不愿为费城打球', '#', 'NBA', 'left')
+        )
+    ).add(
+        new Item('normal').add(
+            new TypeNews('火炮飚6三分创新高', '#', 'CBA', 'right')
+        )
+    ).show();
 
 }();
